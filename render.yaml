@@ -4,7 +4,3 @@ services:
     runtime: docker
     plan: free
     healthCheckPath: /
-    disk:
-      name: vaultdrop-storage
-      mountPath: /var/vaultdrop
-      sizeGB: 1

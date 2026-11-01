@@ -48,6 +48,7 @@ git push -u origin main
 4. After deployment, copy the `https://...onrender.com` URL and test an upload/download using another browser or phone.
 
 > The free Render plan may sleep when unused. For a more reliable final demo, choose a paid instance.
+> Its filesystem is also temporary, so do not rely on it as permanent file storage. Upload a fresh test file immediately before demonstrating the project.
 
 ## Docker alternative
 
