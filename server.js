@@ -8,6 +8,7 @@ const fs = require('fs');
 const path = require('path');
 
 const app = express();
+app.set('trust proxy', 1); // Render terminates HTTPS at a reverse proxy.
 const PORT = process.env.PORT || 3000;
 const ROOT = __dirname;
 const STORAGE_ROOT = process.env.STORAGE_PATH || ROOT;
