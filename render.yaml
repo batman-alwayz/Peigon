@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: vaultdrop
+    runtime: docker
+    plan: free
+    healthCheckPath: /
+    disk:
+      name: vaultdrop-storage
+      mountPath: /var/vaultdrop
+      sizeGB: 1

@@ -1,0 +1,11 @@
+services:
+  vaultdrop:
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - vaultdrop-data:/var/vaultdrop/data
+      - vaultdrop-uploads:/var/vaultdrop/uploads
+volumes:
+  vaultdrop-data:
+  vaultdrop-uploads:
