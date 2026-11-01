@@ -1,4 +1,4 @@
-# VaultDrop
+# Peigon
 
 Temporary, zero-trust file transfer. A sender uploads a file, defines a time limit, download cap and optional passkey, then receives a secret link. The receiver unlocks and downloads it before it self-destructs.
 

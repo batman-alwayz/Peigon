@@ -125,4 +125,4 @@ app.use((err, _req, res, _next) => {
   if (err instanceof multer.MulterError && err.code === 'LIMIT_FILE_SIZE') return res.status(400).json({ error: 'Files must be 100 MB or smaller.' });
   res.status(400).json({ error: 'Request could not be processed.' });
 });
-app.listen(PORT, () => console.log(`VaultDrop running at http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`Peigon running at http://localhost:${PORT}`));
