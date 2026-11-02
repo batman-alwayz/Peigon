@@ -130,18 +130,6 @@ https://peigon.example.com/vault/<43-character-token>#<base64url-key>
 
 ---
 
-## 👥 Team KERNEL PARADOX — Task Division
-
-*Built with passion for the **AWS Student Builder Club**.*
-
-| Team Member | Role | Core Responsibilities & Modules Owned | Key Deliverables |
-| :--- | :--- | :--- | :--- |
-| **Garvit Lalwani** | **Frontend Engineering & Client Cryptography** | • Client-side Web Crypto API (`AES-GCM` 256-bit encrypt/decrypt)<br>• Drag-and-drop file upload UI & progress telemetry<br>• In-browser multi-file ZIP creation with `fflate`<br>• URL `#fragment` key extraction & safe link generation | • `client/src/main.jsx`<br>• Client cryptographic cipher suite<br>• Sender & Receiver portal interfaces |
-| **Naman** | **Backend Security & Tokenization Engine** | • Express REST API architecture & input validation (`Zod`)<br>• Cryptographically secure token hashing (`SHA-256` digests)<br>• 60-second HMAC-SHA256 download ticket authentication<br>• Passkey verification via `bcrypt` & brute-force throttling | • `server.js` & `src/routes/`<br>• `src/services/securityService.js`<br>• `src/middleware/securityHeaders.js` |
-| **Piyush Sharma** | **Database Architecture & Expiry Engine** | • SQLite schema design with WAL mode & atomic transactions<br>• Atomic download count decrementing under concurrency<br>• Automated 5-minute cron worker for disk/record purge<br>• Unified 404 error handling for zero token enumeration | • `src/database.js`<br>• `src/services/cleanupService.js`<br>• `tests/server.test.js` concurrency suite |
-| **Karan Bhatia** | **Cloud Architecture, AWS Integration & DevOps** | • AWS production architecture (S3 Pre-signed URLs, CloudFront)<br>• Multi-stage Docker containerization & Docker Compose<br>• Environment configuration & AWS Parameter Store modeling<br>• CI/CD pipeline (`.github/workflows/ci.yml`) & health checks | • `Dockerfile` & `docker-compose.yml`<br>• AWS S3 direct upload/download design<br>• Production deployment documentation |
-
----
 
 ## 🛠️ Tech Stack & Tooling
 
