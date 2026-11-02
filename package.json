@@ -8,6 +8,7 @@
     "dev": "concurrently \"node --watch server.js\" \"vite\"",
     "client": "vite",
     "build": "vite build",
+    "deploy:cloudflare": "npm run build && wrangler deploy",
     "test": "node --test"
   },
   "keywords": [],
@@ -28,6 +29,7 @@
     "@vitejs/plugin-react": "^6.1.2",
     "concurrently": "^10.0.6",
     "tailwindcss": "^4.3.3",
-    "vite": "^8.3.5"
+    "vite": "^8.3.5",
+    "wrangler": "^4.156.1"
   }
 }
