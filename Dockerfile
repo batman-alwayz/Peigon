@@ -13,6 +13,9 @@ COPY package*.json ./
 RUN npm ci --omit=dev
 COPY --from=build /app/client/dist ./client/dist
 COPY server.js ./
-RUN mkdir -p /var/vaultdrop/data /var/vaultdrop/uploads
+RUN addgroup -S peigon && adduser -S peigon -G peigon \
+  && mkdir -p /var/vaultdrop/data /var/vaultdrop/uploads \
+  && chown -R peigon:peigon /app /var/vaultdrop
+USER peigon
 EXPOSE 3000
 CMD ["node", "server.js"]

@@ -20,6 +20,14 @@ Temporary, zero-trust file transfer. A sender uploads a file, defines a time lim
 - Cleanup worker runs every five minutes and deletes expired/exhausted data
 - Responsive sender and receiver screens
 
+## Architecture and security model
+
+The browser sends an upload to the Express API. Multer writes the binary to the local storage directory, while the JSON metadata record stores the expiry, count and security state. The raw share token is only returned once in the URL; the stored record contains only its SHA-256 hash. Passkeys are bcrypt hashes.
+
+The receiver first exchanges a correct passkey for a one-time, 60-second unlock ticket. The download request submits this short-lived ticket instead of resending the passkey. Five incorrect attempts block the share; attempts are also tracked per IP over a 15-minute window. The app emits `nosniff`, no-cache and no-referrer headers, and unavailable/unknown shares receive the same 404 response.
+
+Threat model: this protects against guessed links, metadata exposure before unlock, passkey disclosure at rest, basic online guessing, and simultaneous downloads within the current single-instance deployment. It is not an end-to-end encrypted system: the server processes uploaded files. Virus scanning, content-disposition hardening, Redis/PostgreSQL coordination, and S3 object storage are production upgrades.
+
 ## Local development
 
 ```bash

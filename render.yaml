@@ -3,4 +3,4 @@ services:
     name: vaultdrop
     runtime: docker
     plan: free
-    healthCheckPath: /
+    healthCheckPath: /health
