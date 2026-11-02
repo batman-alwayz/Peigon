@@ -6,13 +6,12 @@
 *Engineered for secure, self-destructing, client-side encrypted file transfers.*
 
 [![Built for AWS Student Builder Club](https://img.shields.io/badge/AWS_Student_Builder_Club-KERNEL_PARADOX-FF9900?logo=amazon-aws&logoColor=white&style=for-the-badge)](https://aws.amazon.com/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
 [![Node.js 22+](https://img.shields.io/badge/Node.js-22%2B-339933?logo=node.js&logoColor=white&style=for-the-badge)](https://nodejs.org/)
 [![React 19](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black&style=for-the-badge)](https://react.dev/)
 [![Vite](https://img.shields.io/badge/Vite-8.3-646CFF?logo=vite&logoColor=white&style=for-the-badge)](https://vitejs.dev/)
 [![Tailwind CSS v4](https://img.shields.io/badge/Tailwind_CSS-4.3-06B6D4?logo=tailwindcss&logoColor=white&style=for-the-badge)](https://tailwindcss.com/)
 [![SQLite WAL](https://img.shields.io/badge/Storage-SQLite_WAL-003B57?logo=sqlite&logoColor=white&style=for-the-badge)](https://www.sqlite.org/)
-[![AWS Ready](https://img.shields.io/badge/Cloud-AWS_S3_%2B_CloudFront-232F3E?logo=amazon-aws&logoColor=white&style=for-the-badge)](https://aws.amazon.com/)
+[![AWS Planned](https://img.shields.io/badge/Cloud-AWS%20planned-232F3E?logo=amazon-aws&logoColor=white&style=for-the-badge)](https://aws.amazon.com/)
 
 <p align="center">
   <a href="#-project-overview">Overview</a> •
@@ -38,7 +37,7 @@ Modern collaboration requires sharing sensitive documents—credentials, server 
 3. **Uncontrolled Dissemination:** Links can be scraped, indexed, or shared repeatedly without strict view quotas or hard mathematical self-destruction.
 
 ### 💡 The Solution: Peigon
-**Peigon** is an end-to-end encrypted, zero-trust ephemeral file transfer platform (analogous to *Firefox Send* or *SendSafely*). It guarantees that files are:
+**Peigon** is an ephemeral file transfer platform (analogous to *Firefox Send* or *SendSafely*). The current browser app encrypts uploads end-to-end. The retained legacy API accepts unencrypted uploads for backward compatibility. Current browser transfers are:
 - **Client-Side Encrypted:** Encrypted with **AES-256-GCM** inside the sender's browser *before* any bytes touch the wire.
 - **Zero-Knowledge by Design:** The cryptographic decryption key is embedded solely in the URL `#fragment` (RFC 3986), which browsers never transmit in HTTP requests. The server stores only raw ciphertext and can never inspect file contents or original filenames.
 - **Strictly Self-Destructing:** Files automatically vaporize based on granular rules—either reaching a strict download cap (1, 3, or 10 downloads) or time-to-live expiration (10 min, 1 hr, 24 hr).
@@ -50,26 +49,29 @@ Modern collaboration requires sharing sensitive documents—credentials, server 
 
 ### 1. 🚀 Secure Upload Portal (Sender)
 - **Drag-and-Drop Staging Zone:** Streamlined file drop zone supporting single files or multi-file selections (up to **100 MB** total).
-- **Client-Side Archive Engine:** Multiple files are automatically bundled into an uncompressed or compressed ZIP archive directly in client memory via `fflate` prior to encryption.
+- **Client-Side Archive Engine:** Multiple files are bundled into a ZIP archive directly in client memory via `fflate` prior to encryption.
 - **Granular Expiry Rules:**
   - **Time Caps:** `10 minutes` (quick exchange), `1 hour` (standard meeting), `24 hours` (asynchronous drop).
   - **Download Limits:** `1 download` (burn-after-reading), `3 downloads` (small team), or `10 downloads` (workgroup).
-- **Passkey Gate (Optional):** Custom password protection hashed on the server using **bcrypt**; required prior to retrieving file metadata or download tokens.
+- **Passkey Gate (Optional):** Custom password protection hashed on the server using **bcrypt**; required before protected share metadata or download tickets are returned.
 - **Live Progress & Telemetry:** Real-time upload percentage, encrypted payload size calculations, and instant generation of the zero-trust share link.
 
 ### 2. 🔐 Access & Decryption Portal (Receiver)
 - **Non-Guessable Vault URLs:** Links route to `/vault/:shareToken#<base64-encryption-key>`.
 - **Zero-Leak Passkey Verification:** Metadata (file size, name, download count) is completely withheld until the passkey is validated.
-- **Ephemeral Download Tickets:** A successful password check issues a short-lived (60-second) HMAC-SHA256 signed bearer ticket. Passwords are never re-sent during file downloads.
-- **In-Browser Decryption:** Streams ciphertext chunks and decrypts them using the browser's native **Web Crypto API**, automatically reconstructing the original filename and file extension.
+- **Ephemeral Download Tickets:** A successful password check issues a short-lived (60-second) HMAC-SHA256 signed bearer ticket. The current browser app does not resend passkeys during downloads; legacy API clients can still use the original request format.
+- **In-Browser Decryption:** Fetches the encrypted file and decrypts it using the browser's native **Web Crypto API**, restoring the encrypted original filename.
 
 ### 3. ⚙️ Backend Orchestrator & Expiry Engine
 - **Token Enumeration Prevention:** Raw share tokens are never stored. The server hashes tokens using **SHA-256 digests**, making database compromise useless for constructing valid download URLs.
-- **Atomic Concurrency Control:** SQLite write-ahead logging (WAL) executes atomic decrements (`UPDATE shares SET downloads_remaining = downloads_remaining - 1 WHERE ...`). Concurrent race attempts cannot exceed the download quota.
+- **Atomic Concurrency Control:** SQLite write-ahead logging (WAL) executes conditional atomic decrements (`UPDATE shares SET downloads_remaining = downloads_remaining - 1 WHERE ...`). Concurrent requests cannot exceed the download quota.
 - **Automated Garbage Collection Worker:** A recurring cron job running every **5 minutes** permanently wipes expired and exhausted binary files from disk/storage and marks records as deleted.
 - **Unified 404 Responses:** Invalid, expired, exhausted, and non-existent tokens return identical 404 responses to eliminate oracle enumeration attacks.
 
-### 4. ☁️ AWS Cloud Milestone (Final Phase - Ready)
+### 4. ☁️ AWS Cloud Milestone (Planned)
+
+This architecture is a future milestone; the current app uses local SQLite and filesystem storage and does not include AWS integrations.
+
 - **Direct-to-S3 Uploads:** Pre-signed S3 `PUT` URLs eliminate web-server memory and network bottlenecks.
 - **Ephemeral S3 Downloads:** Pre-signed S3 `GET` URLs (valid for 60 seconds) generated dynamically upon ticket validation.
 - **Edge Acceleration:** Static Vite bundle distributed through **AWS CloudFront** with **AWS S3** origin.
@@ -88,8 +90,9 @@ sequenceDiagram
     participant FS as 💾 Storage (Disk / S3)
     actor Receiver as 👥 Receiver Browser
 
-    Note over Sender: 1. Generate 256-bit AES-GCM Key (K)<br/>2. Encrypt Filename & Bytes with K<br/>3. Generate random Share Token (T)
-    Sender->>API: POST /api/shares (ciphertext, encryptedName, SHA-256(T), rules)
+    Note over Sender: 1. Generate 256-bit AES-GCM Key (K)<br/>2. Encrypt Filename & Bytes with K
+    Sender->>API: POST /api/shares (ciphertext, encryptedName, rules)
+    API->>API: Generate random Share Token (T)
     API->>FS: Store encrypted binary file
     API->>DB: Store SHA-256(T), limits, bcrypt(password)
     API-->>Sender: 201 Created (Upload confirmed)
@@ -102,11 +105,11 @@ sequenceDiagram
     API->>DB: Query by SHA-256(T) & verify active state
     API-->>Receiver: 200 OK (Requires Passkey? true/false)
 
+    Receiver->>API: POST /api/shares/T/unlock { password or empty string }
     opt If Password Protected
-        Receiver->>API: POST /api/shares/T/unlock { password }
         API->>DB: Verify bcrypt hash
-        API-->>Receiver: 200 OK { ticket: HMAC(T, 60s), encryptedName }
     end
+    API-->>Receiver: 200 OK { ticket, share metadata }
 
     Receiver->>API: POST /api/shares/T/download (Bearer: HMAC Ticket)
     API->>DB: Atomic Decrement (downloads_remaining - 1)
@@ -118,14 +121,12 @@ sequenceDiagram
 ### Why the URL Fragment (`#`) Guarantees Zero-Trust
 According to **RFC 3986 §3.5**, uniform resource identifier (URI) fragments are evaluated strictly on the client agent. When a user navigates to:
 ```
-https://peigon.example.com/vault/c8f2a170b0e9#kZ7_y4U9vF3...
-                                \____  ____/ \_____  _____/
-                                     \/            \/
-                           Share Token (HTTP)   AES-256 Key (Local Only)
+https://peigon.example.com/vault/<43-character-token>#<base64url-key>
+                                     Share Token      AES-256 Key (Local Only)
 ```
-1. The **Share Token** (`c8f2a170b0e9`) is sent in the HTTP GET path to identify the database record.
-2. The **AES-256 Key** (`kZ7_y4U9vF3...`) stays inside the browser's JavaScript execution runtime. It is **never sent** in HTTP request headers, request bodies, or server access logs.
-3. Even in the event of an infrastructure subpoena, full database dump, or cloud storage leak, **the files cannot be decrypted** without the recipient's private URL fragment.
+1. The **Share Token** is sent in the HTTP GET path to identify the database record.
+2. The **AES-256 Key** stays inside the browser's JavaScript execution runtime. It is **never sent** in HTTP request headers or request bodies.
+3. A database or ciphertext storage leak does not reveal file contents without the recipient's private URL fragment. This applies to transfers made with the current browser app; legacy API uploads are unencrypted.
 
 ---
 
@@ -135,7 +136,7 @@ https://peigon.example.com/vault/c8f2a170b0e9#kZ7_y4U9vF3...
 
 | Team Member | Role | Core Responsibilities & Modules Owned | Key Deliverables |
 | :--- | :--- | :--- | :--- |
-| **Garvit Lalwani** | **Frontend Engineering & Client Cryptography** | • Client-side Web Crypto API (`AES-GCM` 256-bit encrypt/decrypt)<br>• Drag-and-drop file upload UI & progress telemetry<br>• In-browser multi-file ZIP streaming with `fflate`<br>• URL `#fragment` key extraction & safe link generation | • `client/src/main.jsx`<br>• Client cryptographic cipher suite<br>• Sender & Receiver portal interfaces |
+| **Garvit Lalwani** | **Frontend Engineering & Client Cryptography** | • Client-side Web Crypto API (`AES-GCM` 256-bit encrypt/decrypt)<br>• Drag-and-drop file upload UI & progress telemetry<br>• In-browser multi-file ZIP creation with `fflate`<br>• URL `#fragment` key extraction & safe link generation | • `client/src/main.jsx`<br>• Client cryptographic cipher suite<br>• Sender & Receiver portal interfaces |
 | **Naman** | **Backend Security & Tokenization Engine** | • Express REST API architecture & input validation (`Zod`)<br>• Cryptographically secure token hashing (`SHA-256` digests)<br>• 60-second HMAC-SHA256 download ticket authentication<br>• Passkey verification via `bcrypt` & brute-force throttling | • `server.js` & `src/routes/`<br>• `src/services/securityService.js`<br>• `src/middleware/securityHeaders.js` |
 | **Piyush Sharma** | **Database Architecture & Expiry Engine** | • SQLite schema design with WAL mode & atomic transactions<br>• Atomic download count decrementing under concurrency<br>• Automated 5-minute cron worker for disk/record purge<br>• Unified 404 error handling for zero token enumeration | • `src/database.js`<br>• `src/services/cleanupService.js`<br>• `tests/server.test.js` concurrency suite |
 | **Karan Bhatia** | **Cloud Architecture, AWS Integration & DevOps** | • AWS production architecture (S3 Pre-signed URLs, CloudFront)<br>• Multi-stage Docker containerization & Docker Compose<br>• Environment configuration & AWS Parameter Store modeling<br>• CI/CD pipeline (`.github/workflows/ci.yml`) & health checks | • `Dockerfile` & `docker-compose.yml`<br>• AWS S3 direct upload/download design<br>• Production deployment documentation |
@@ -150,7 +151,7 @@ https://peigon.example.com/vault/c8f2a170b0e9#kZ7_y4U9vF3...
 | **Build Tool** | **Vite 8** | High-performance bundling, development HMR, and static assets |
 | **Styling** | **Tailwind CSS v4** | Modern, responsive, utility-first design system |
 | **Icons** | **Lucide React** | Intuitive visual indicators for state, security, and actions |
-| **Client Compression** | **fflate** | Fast, client-side ZIP stream creation for multi-file transfers |
+| **Client Compression** | **fflate** | Client-side ZIP creation for multi-file transfers |
 | **Client Encryption** | **Web Crypto API (SubtleCrypto)** | Native 256-bit AES-GCM encryption with 12-byte random IVs |
 | **Backend Runtime** | **Node.js 22 (LTS)** | High-throughput asynchronous server runtime |
 | **Web Server** | **Express 5** | RESTful routing, streaming attachments, and middleware |
@@ -160,7 +161,7 @@ https://peigon.example.com/vault/c8f2a170b0e9#kZ7_y4U9vF3...
 | **Scheduler** | **node-cron** | 5-minute interval automated disk cleanup of expired shares |
 | **Testing** | **Vitest 5 + Supertest** | Unit, integration, security, and concurrency race-condition tests |
 | **Containerization** | **Docker (Alpine Multi-Stage)** | Lightweight, hardened production container running as `node` user |
-| **Cloud Services** | **AWS S3, CloudFront, App Runner** | Final production architecture for serverless scale and direct-to-S3 I/O |
+| **Planned Cloud Services** | **AWS S3, CloudFront, App Runner** | Future production architecture for direct-to-S3 I/O |
 
 ---
 
@@ -273,14 +274,14 @@ Access the application at `http://localhost:3000`. Encrypted files and the SQLit
 
 ## 📡 API Specification
 
-All responses return standard JSON. Ephemeral download routes stream raw encrypted binary payloads.
+Control endpoints return JSON. Download endpoints stream the encrypted file bytes.
 
 ### 1. Create a Secure Share
 - **Endpoint:** `POST /api/shares`
 - **Content-Type:** `multipart/form-data`
 - **Payload:**
-  - `file`: Encrypted binary attachment (max 100 MB).
-  - `encryptedName`: Base64URL encoded encrypted original filename.
+  - `file`: File bytes (max 100 MB). The current browser app encrypts these bytes before upload.
+  - `encryptedName`: Base64URL encoded encrypted original filename (sent by the current browser app).
   - `expiryMinutes`: `10` \| `60` \| `1440` (minutes).
   - `maxDownloads`: `1` \| `3` \| `10`.
   - `password`: *(Optional)* Client-defined passkey string.
@@ -288,12 +289,19 @@ All responses return standard JSON. Ephemeral download routes stream raw encrypt
 **Response (`201 Created`):**
 ```json
 {
-  "token": "04bfca081b212f458e658ec35ffb0b00",
-  "url": "/vault/04bfca081b212f458e658ec35ffb0b00",
-  "expiresAt": "2026-11-02T14:15:00.000Z",
-  "downloadsRemaining": 3
+  "url": "https://peigon.example.com/vault/<43-character-token>",
+  "share": {
+    "fileName": null,
+    "encryptedName": "<base64url-ciphertext>",
+    "fileSize": 1459228,
+    "expiresAt": "2026-11-02T14:15:00.000Z",
+    "downloadsRemaining": 3,
+    "passwordRequired": false
+  }
 }
 ```
+
+The `encryptedName` field is optional for compatibility with older clients. Omitting it creates a legacy, unencrypted share.
 
 ---
 
@@ -307,15 +315,18 @@ All responses return standard JSON. Ephemeral download routes stream raw encrypt
 }
 ```
 
-**Response (`200 OK` - When No Passkey / Unlocked):**
+**Response (`200 OK` - When No Passkey Is Configured):**
 ```json
 {
-  "fileName": "payload.bin",
-  "encryptedName": "eU72...",
-  "fileSize": 1459200,
-  "expiresAt": "2026-11-02T14:15:00.000Z",
-  "downloadsRemaining": 3,
-  "passwordRequired": false
+  "passwordRequired": false,
+  "share": {
+    "fileName": null,
+    "encryptedName": "<base64url-ciphertext>",
+    "fileSize": 1459228,
+    "expiresAt": "2026-11-02T14:15:00.000Z",
+    "downloadsRemaining": 3,
+    "passwordRequired": false
+  }
 }
 ```
 
@@ -326,15 +337,20 @@ All responses return standard JSON. Ephemeral download routes stream raw encrypt
 - **Content-Type:** `application/json`
 - **Body:** `{ "password": "user-passkey" }`
 
+The current browser client calls this endpoint for every share to obtain its download ticket. For a share without a passkey, send an empty password.
+
 **Response (`200 OK`):**
 ```json
 {
-  "ticket": "8f8b3c99...",
-  "fileName": "payload.bin",
-  "encryptedName": "eU72...",
-  "fileSize": 1459200,
-  "expiresAt": "2026-11-02T14:15:00.000Z",
-  "downloadsRemaining": 3
+  "share": {
+    "fileName": null,
+    "encryptedName": "<base64url-ciphertext>",
+    "fileSize": 1459228,
+    "expiresAt": "2026-11-02T14:15:00.000Z",
+    "downloadsRemaining": 3,
+    "passwordRequired": true
+  },
+  "ticket": "<payload>.<signature>"
 }
 ```
 > [!NOTE]
@@ -345,8 +361,9 @@ All responses return standard JSON. Ephemeral download routes stream raw encrypt
 ### 4. Download Payload
 - **Endpoint:** `POST /api/shares/:token/download`
 - **Headers:** `Authorization: Bearer <ticket>` (or legacy JSON body)
-- **Response (`200 OK`):** Streams `application/octet-stream` binary with `Cache-Control: no-store` and `X-Content-Type-Options: nosniff`.
-- **Side Effect:** Atomically decrements `downloads_remaining`. If `0`, immediately purges the file from storage and marks the record deleted.
+- **Response (`200 OK`):** Streams the file with `Cache-Control: no-store` and `X-Content-Type-Options: nosniff`.
+- **Side Effect:** Atomically decrements `downloads_remaining`. When the final allowed download completes, the server deletes the file and marks the record deleted.
+- **Legacy behavior:** Clients uploading without `encryptedName` may provide the passkey in the JSON request body instead of a ticket. Those legacy shares are not end-to-end encrypted.
 
 ---
 
@@ -355,9 +372,7 @@ All responses return standard JSON. Ephemeral download routes stream raw encrypt
 - **Response (`200 OK`):**
 ```json
 {
-  "status": "ok",
-  "uptime": 3600,
-  "db": "connected"
+  "status": "ok"
 }
 ```
 
@@ -365,7 +380,7 @@ All responses return standard JSON. Ephemeral download routes stream raw encrypt
 
 ## ☁️ AWS Cloud Milestone Architecture
 
-For high-scale production deployments, Peigon transitions seamlessly to native AWS cloud primitives:
+For a future high-scale production deployment, Peigon could transition to AWS cloud services:
 
 ```mermaid
 flowchart TD
@@ -395,7 +410,7 @@ flowchart TD
    - An **AWS CloudFront** distribution provides SSL termination, HTTP/3, and low-latency edge delivery worldwide.
 2. **Direct-to-S3 Uploads (Eliminating Server Overhead):**
    - The Express backend uses `@aws-sdk/s3-request-presigner` to issue an S3 `PutObjectCommand` Pre-signed URL.
-   - The client streams the encrypted file directly to S3 via HTTP `PUT`. The Node.js server handles zero binary payload bytes, allowing infinite concurrent uploads with negligible memory footprint.
+   - The client sends the encrypted file directly to S3 via HTTP `PUT`. The Node.js server does not handle the binary payload, which can reduce server bandwidth and improve upload capacity.
 3. **Ephemeral S3 Pre-Signed Downloads:**
    - Once a recipient validates their passkey, the API issues a temporary S3 `GetObjectCommand` pre-signed link valid for exactly 60 seconds.
 4. **Secrets & Security:**
@@ -409,13 +424,13 @@ flowchart TD
 
 | Threat / Attack Vector | Mitigation in Peigon |
 | :--- | :--- |
-| **Server-Side Data Breach** | **Zero-Knowledge AES-GCM:** All files and file names are encrypted in the sender's browser. Decryption keys are stored exclusively in the URL fragment (`#`) and never sent over the network. |
+| **Server-Side Data Breach** | **Browser AES-GCM:** Current browser-app transfers encrypt file contents and names before upload. Decryption keys stay in the URL fragment (`#`) and are not sent to the server. Legacy API uploads without `encryptedName` are unencrypted. |
 | **Database Compromise** | **Hashed Token Digests:** The database stores `SHA-256(token)`. A stolen database cannot be used to deduce share URLs or download files. |
-| **Passkey Brute-Forcing** | **Adaptive Rate Limiting & Throttling:** Bcrypt hashes passkeys with salt rounds. Client IPs and tokens face exponential throttling and a **15-minute complete lockout** after 5 failed attempts. |
+| **Passkey Brute-Forcing** | **Rate Limiting & Lockout:** Bcrypt hashes passkeys. Client IPs and tokens receive a **15-minute lockout** after 5 failed attempts. |
 | **Race Conditions on Download Limit** | **Atomic SQL Decrements:** Download counts are decremented within atomic transactions before streaming begins. Concurrent requests cannot exceed download limits. |
-| **Link Scraping & Crawlers** | **Robots & Cache Control:** All endpoints enforce `no-store, no-cache, must-revalidate` and `X-Robots-Tag: noindex`. |
+| **Link Scraping & Crawlers** | **Cache and Referrer Controls:** Responses use `Cache-Control: no-store` and `Referrer-Policy: no-referrer`. |
 | **Orchestrated ID Enumeration** | **Uniform 404 Behavior:** Invalid tokens, expired tokens, exhausted shares, and deleted links all return identical HTTP 404 responses. |
-| **MIME Sniffing & XSS** | **Strict Security Headers:** `Helmet` applies strict `X-Content-Type-Options: nosniff`, sanitizes filenames, and disallows dangerous inline execution. |
+| **MIME Sniffing & XSS** | **Security Headers and Filenames:** `Helmet` applies `X-Content-Type-Options: nosniff`; legacy filenames are sanitized and downloads use attachment disposition. |
 
 ---
 
@@ -448,7 +463,7 @@ npm run build
 
 ## 📜 License
 
-Distributed under the **MIT License**. See `LICENSE` for more information.
+This repository does not currently contain a `LICENSE` file. Choose and add a license before redistributing the project.
 
 ---
 
