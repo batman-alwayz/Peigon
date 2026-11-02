@@ -3,9 +3,4 @@ services:
     name: vaultdrop
     runtime: docker
     plan: free
-    healthCheckPath: /healthz
-    envVars:
-      - key: TRUST_PROXY
-        value: "true"
-      - key: TICKET_SECRET
-        generateValue: true
+    healthCheckPath: /

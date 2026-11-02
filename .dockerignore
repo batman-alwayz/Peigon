@@ -2,7 +2,3 @@ node_modules
 data
 uploads
 .git
-.env
-client/dist
-coverage
-tests

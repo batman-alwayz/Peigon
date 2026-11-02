@@ -1,51 +1,32 @@
 {
-  "name": "peigon",
+  "name": "all-who-are-belonging-to-the",
   "version": "1.0.0",
   "description": "",
   "main": "server.js",
-  "engines": {
-    "node": ">=22.12"
-  },
   "scripts": {
-    "start": "node --env-file-if-exists=.env server.js",
-    "dev": "concurrently \"node --env-file-if-exists=.env --watch server.js\" \"vite\"",
+    "start": "node server.js",
+    "dev": "concurrently \"node --watch server.js\" \"vite\"",
     "client": "vite",
     "build": "vite build",
-    "test": "vitest run",
-    "lint": "eslint .",
-    "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "test": "node --test"
   },
   "keywords": [],
   "type": "commonjs",
   "dependencies": {
     "bcryptjs": "^3.0.3",
-    "better-sqlite3": "^13.0.3",
     "cors": "^2.8.6",
     "express": "^5.3.0",
-    "fflate": "^0.8.3",
-    "file-type": "^22.3.0",
-    "helmet": "^8.3.0",
     "lucide-react": "^1.66.0",
     "multer": "^2.5.0",
     "node-cron": "^4.6.0",
     "react": "^19.3.1",
-    "react-dom": "^19.3.1",
-    "zod": "^4.6.7"
+    "react-dom": "^19.3.1"
   },
   "devDependencies": {
-    "@eslint/js": "^10.0.1",
     "@tailwindcss/vite": "^4.3.3",
     "@vitejs/plugin-react": "^6.1.2",
     "concurrently": "^10.0.6",
-    "eslint": "^10.14.0",
-    "prettier": "^3.9.10",
-    "supertest": "^7.3.1",
     "tailwindcss": "^4.3.3",
-    "vite": "^8.3.5",
-    "vitest": "^5.0.5"
-  },
-  "overrides": {
-    "minimatch": "^11.0.1"
+    "vite": "^8.3.5"
   }
 }
