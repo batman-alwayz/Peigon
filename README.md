@@ -15,7 +15,8 @@ Temporary, zero-trust file transfer. A sender uploads a file, defines a time lim
 - Expiry choices: 10 minutes, 1 hour, 24 hours
 - Download caps: 1, 3 or 10
 - Passkey gate; protected shares reveal no asset metadata before unlock
-- Download count is consumed before the stream begins, stopping repeat one-time downloads
+- Download count is consumed inside a per-share lock before streaming, stopping concurrent requests from bypassing a cap on this single service instance
+- Five incorrect passkey attempts permanently block that share
 - Cleanup worker runs every five minutes and deletes expired/exhausted data
 - Responsive sender and receiver screens
 
@@ -58,4 +59,4 @@ docker compose up --build
 
 ## Planned production milestone
 
-The assignment’s optional cloud phase is intentionally documented as future scope: swap the local storage driver for S3 pre-signed PUT/GET URLs, PostgreSQL/Redis for multi-instance atomic counters and rate limits, and use CloudFront for the frontend.
+The assignment’s optional cloud phase is intentionally documented as future scope: swap the local storage driver for S3 pre-signed PUT/GET URLs, PostgreSQL/Redis for multi-instance atomic counters and rate limits, and use CloudFront for the frontend. The current keyed in-memory lock is reliable for this single Render instance; a multi-instance production deployment must use a PostgreSQL transaction or Redis atomic operation instead.
